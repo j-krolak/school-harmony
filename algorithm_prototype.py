@@ -5,6 +5,17 @@ class Teacher_Data:
         self.hours = hours
         self.name = name
 
+def get_shift_weight(shift: int):
+    ten_minutes_shift = [0, 1, 3, 4]
+    long_shift = [2]
+
+    if shift % 8 in ten_minutes_shift:
+        return 10
+    if shift % 8 in long_shift:
+        return 20
+    return 5
+    
+
 
 
 def get_solution(teachers_data: list[Teacher_Data] , minimal_dis: float, maximal_dis: float) -> bool | list[list[int]]:
@@ -23,10 +34,11 @@ def get_solution(teachers_data: list[Teacher_Data] , minimal_dis: float, maximal
     teachers_dict = LpVariable.dicts("Teachers", (TEACHERS,HOURS), cat=LpBinary)
 
     for teacher_id in TEACHERS: 
+        # Set constraints for ratios of working hours to all hours
+        model += lpSum([get_shift_weight(hour) * teachers_dict[teacher_id][hour] for hour in HOURS]) / sum(get_shift_weight(shift) for shift in teachers_data[teacher_id].hours) <= maximal_dis 
+        model += lpSum([get_shift_weight(hour) * teachers_dict[teacher_id][hour] for hour in HOURS]) /sum(get_shift_weight(shift) for shift in teachers_data[teacher_id].hours) >= minimal_dis 
+
         for hour in HOURS:
-            # Set constraints for ratios of working hours to all hours
-            model += lpSum([teachers_dict[teacher_id][hour] for hour in HOURS]) / len(teachers_data[teacher_id].hours) <= maximal_dis 
-            model += lpSum([teachers_dict[teacher_id][hour] for hour in HOURS]) / len(teachers_data[teacher_id].hours) >= minimal_dis 
 
             if not hour in teachers_data[teacher_id].hours:
                 # Set constraints to exclude hours when the employer doesn't work
@@ -48,12 +60,12 @@ def get_solution(teachers_data: list[Teacher_Data] , minimal_dis: float, maximal
             if not val in [0, 1]:
                 return False
             if val == 1:
-                counter += 1
+                counter += get_shift_weight(hour)
         
-        if counter/ len(teachers_data[teacher_id].hours) > maximal_dis:
+        if counter /sum(get_shift_weight(shift) for shift in teachers_data[teacher_id].hours) > maximal_dis:
             return False
         
-        if counter/ len(teachers_data[teacher_id].hours) < minimal_dis:
+        if  counter /sum(get_shift_weight(shift) for shift in teachers_data[teacher_id].hours) < minimal_dis:
             return False
 
     result = []
@@ -70,11 +82,12 @@ def display_solution(teachers_data: list[Teacher_Data] ,optimal_values: (float, 
     for teacher_id in range(len(teachers_data)):
         print(f"{teachers_data[teacher_id].name}: ")
         for hour in optimal_solution[teacher_id]:
-            print(hour, end=" ")
+            print(get_shift_weight(hour), end=" ")
         print()
 
+# TODO: Find optimal values using binary search!
 def find_optimal_solution(teachers_data: list[Teacher_Data]) -> (float, float): 
-    step = 1/(max([len(teacher.hours) for teacher in teachers_data])+2)
+    step = 1/max([sum(get_shift_weight(shift) for shift in teacher.hours ) for teacher in teachers_data])
     maximal_dis = 1
 
     while maximal_dis >= 0:
@@ -83,8 +96,10 @@ def find_optimal_solution(teachers_data: list[Teacher_Data]) -> (float, float):
             maximal_dis += step
             possible_solution = get_solution(teachers_data, 0, maximal_dis)
             break
-        
-        maximal_dis -= step
+        if maximal_dis - step >= 0:
+            maximal_dis -= step
+        else:
+            break
     
 
     minimal_dis = 0
@@ -97,15 +112,23 @@ def find_optimal_solution(teachers_data: list[Teacher_Data]) -> (float, float):
             possible_solution = get_solution(teachers_data, minimal_dis, maximal_dis)
             break
         
-        minimal_dis += step
+        if minimal_dis + step  <= 1:
+            minimal_dis += step
+        else:
+            break
     
     if maximal_dis > 1 or minimal_dis < 0:
         raise Exception("The correct solution doesn't exist!")
     return (minimal_dis,maximal_dis)
 
 teachers_data = [
-    Teacher_Data("Mr. X",[0, 1, 2, 3 , 4, 6, 8]),
-    Teacher_Data("Mrs. Y", [2, 3, 5, 7])
+    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
 ]
 
 
