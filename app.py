@@ -1,6 +1,10 @@
 from tkinter import ttk
 import tkinter as tk
 
+DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
+HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]
+
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -46,10 +50,51 @@ class HomePage(tk.Frame):
         self.btn_add_teacher = ttk.Button(master=self.bar, text="Dodaj nauczyciela", command=self.add_teacher)
         self.btn_add_teacher.grid(row=1, column=3, sticky=tk.W)
 
+    def handle_checkbox_change(self):
+        self.teachers[self.combo.get()] = []
+        for day in range(5):
+            for hour in range(8):
+                if self.check_btns_state[day][hour].get() == 1:
+                    self.teachers[self.combo.get()].append(day * 5 + hour)
+        
+    
+
+    def create_schedule(self):
+        self.frm_schedule = tk.Frame(self)
+        self.frm_schedule.columnconfigure([i for i in range(9)], minsize=100, weight=1)
+        self.frm_schedule.rowconfigure([i for i in range(6)], minsize=60, weight=1)
+        self.frm_schedule.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
+    
+        tk.Frame(master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=0, column=0, sticky=tk.NSEW)
+
+        # Create labels for days
+        for i in range(5):
+            tk.Label(text=f"{DAYS[i]}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=i+1, column=0, sticky=tk.NSEW)
+
+
+        # Create labels for hours
+        for i in range(0,8):
+            tk.Label(text=f"{i+1}\n{HOURS[i]}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=0, column=i+1, sticky=tk.NSEW)
+
+        # For each cell, create a checkbox
+
+        self.check_btns = [[[] for _ in range(8)] for _ in range(5)]
+        self.check_btns_state  = [[tk.IntVar() for _ in range(8)] for _ in range(5)]
+
+        self.frm_check_btns = [[[] for _ in range(8)] for _ in range(5)]
+        
+        for day in range(5):
+            for hour in range(8):
+                self.frm_check_btns[day][hour] = tk.Frame(master=self.frm_schedule, highlightbackground="black", highlightthickness=1)
+                self.check_btns[day][hour] = tk.Checkbutton(master=self.frm_check_btns[day][hour], variable=self.check_btns_state[day][hour], onvalue=1, offvalue=0, command=self.handle_checkbox_change)
+
+                self.check_btns[day][hour].pack(fill=tk.BOTH, expand=True)
+                self.frm_check_btns[day][hour].grid(row=day+1, column=hour+1, sticky=tk.NSEW)
 
 
     def create_widgets(self):
         self.create_bar()
+        self.create_schedule()
 
 
 if __name__ == "__main__":
