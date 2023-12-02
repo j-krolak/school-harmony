@@ -130,7 +130,7 @@ def find_optimal_solution(teachers_data: list[TeacherData]) -> (float, float):
     minimal_dis = find_optimal_minimal(teachers_data)
     maximal_dis = find_optimal_maximal(teachers_data, minimal_dis)
 
-    if maximal_dis > 1 or minimal_dis < 0:
+    if maximal_dis > 1 or minimal_dis < 0 or not get_solution(teachers_data,minimal_dis, maximal_dis):
         raise Exception("The correct solution doesn't exist!")
     return (minimal_dis,maximal_dis)
 
