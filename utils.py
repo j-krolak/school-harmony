@@ -1,6 +1,7 @@
 from pulp import *
 
 NUM_OF_DUTY_HOURS = 1
+DELTA = 1/10000
 
 class TeacherData:
     def __init__(self, name: str, hours: list[int]) -> None:
@@ -83,42 +84,52 @@ def display_solution(teachers_data: list[TeacherData] ,optimal_values: (float, f
     optimal_solution = get_solution(teachers_data, optimal_values[0], optimal_values[1])
     for teacher_id in range(len(teachers_data)):
         print(f"{teachers_data[teacher_id].name}: ")
+        all = 0
+        for hour in teachers_data[teacher_id].hours:
+            all += get_shift_weight(hour)
+        x = 0
         for hour in optimal_solution[teacher_id]:
-            print(get_shift_weight(hour), end=" ")
-        print()
+            x += get_shift_weight(hour)
 
-# TODO: Find optimal values using binary search!
+        print(f"Optimal ratio: {round(x/all, 4)}")
+
+
+def find_optimal_minimal(teachers_data: list[TeacherData], high=1) -> float:
+    low = 0
+    mid = (low+high)/2
+
+    while( high - low > DELTA):
+        possible_solution = get_solution(teachers_data, mid, 1)
+        if not possible_solution:
+            high = mid - DELTA
+            mid = (low+high)/2
+        else:
+            low = mid
+            mid = (low+high)/2
+
+    return low
+
+def find_optimal_maximal(teachers_data: list[TeacherData], low=0) -> float:
+    high = 1
+    mid = (low+high)/2
+
+    while( high - low > DELTA):
+        possible_solution = get_solution(teachers_data, mid, 1)
+        if not possible_solution:
+            low = mid + DELTA
+            mid = (low+high)/2
+        else:
+            high = mid
+            mid = (low+high)/2
+
+    return high
+
+
+
 def find_optimal_solution(teachers_data: list[TeacherData]) -> (float, float): 
-    step = 1/max([sum(get_shift_weight(shift) for shift in teacher.hours ) for teacher in teachers_data])
-    maximal_dis = 1
+    minimal_dis = find_optimal_minimal(teachers_data)
+    maximal_dis = find_optimal_maximal(teachers_data, minimal_dis)
 
-    while maximal_dis >= 0:
-        possible_solution = get_solution(teachers_data, 0, maximal_dis)
-        if not possible_solution:
-            maximal_dis += step
-            possible_solution = get_solution(teachers_data, 0, maximal_dis)
-            break
-        if maximal_dis - step >= 0:
-            maximal_dis -= step
-        else:
-            break
-    
-
-    minimal_dis = 0
-
-    while minimal_dis <= 1:
-        possible_solution = get_solution(teachers_data, minimal_dis, maximal_dis)
-        
-        if not possible_solution:
-            minimal_dis -= step
-            possible_solution = get_solution(teachers_data, minimal_dis, maximal_dis)
-            break
-        
-        if minimal_dis + step  <= 1:
-            minimal_dis += step
-        else:
-            break
-    
     if maximal_dis > 1 or minimal_dis < 0:
         raise Exception("The correct solution doesn't exist!")
     return (minimal_dis,maximal_dis)

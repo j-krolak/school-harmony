@@ -45,6 +45,7 @@ class HomePage(tk.Frame):
         self.pack(fill=tk.BOTH)
         self.create_widgets()
         self.win_add_teacher = ''
+        self.file_name = None
         self.popup_window = None
 
     def add_teacher(self):
@@ -85,6 +86,8 @@ class HomePage(tk.Frame):
 
     def open_file(self):
         self.file_name = filedialog.askopenfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])
+        if self.file_name is None:
+            return
         with open(self.file_name, "r") as f:
             self.teachers = json.load(f)
         self.combo["values"] = [teacher for teacher in self.teachers]
