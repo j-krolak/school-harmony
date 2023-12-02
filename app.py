@@ -1,6 +1,8 @@
 from tkinter import ttk
-from utils import *
 import tkinter as tk
+from utils import *
+import json
+from tkinter import filedialog
 
 DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
 HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]
@@ -12,28 +14,38 @@ class App(tk.Tk):
         self.title("School Harmony")
         self.geometry("1200x800")
         self.resizable(True, True)
-        self.teachers = {}
         self.create_menu()
 
-        HomePage(self, self.teachers)
-    
+        self.home_page = HomePage(self)
+
+    def save_file_as(self):
+        self.home_page.save_file_as()
+
+    def save_file(self):
+        self.home_page.save_file()
+
+    def open_file(self):
+        self.home_page.open_file()
+
     def create_menu(self):
         self.menubar = tk.Menu(self)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
-        self.filemenu.add_command(label="Otwórz")
-        self.filemenu.add_command(label="Zapisz")
+        self.filemenu.add_command(label="Otwórz", command=self.open_file)
+        self.filemenu.add_command(label="Zapisz", command=self.save_file)
+        self.filemenu.add_command(label="Zapisz jako...", command=self.save_file_as)
 
         self.menubar.add_cascade(label="Plik", menu=self.filemenu)
         self.config(menu=self.menubar)
 
 class HomePage(tk.Frame):
-    def __init__(self, master, teachers):
-        self.teachers = teachers
+    def __init__(self, master):
+        self.teachers = {}
         super().__init__(master)
         self.master = master
         self.pack(fill=tk.BOTH)
         self.create_widgets()
         self.win_add_teacher = ''
+        self.popup_window = None
 
     def add_teacher(self):
         self.teachers[self.ent_add_teacher.get()] =  []
@@ -41,8 +53,43 @@ class HomePage(tk.Frame):
         self.combo["values"] = [teacher for teacher in self.teachers]
         self.combo.current(len(self.teachers)-1)
         self.update_schedule()
+    
+    def show_popup_window(self, text):
+        if self.popup_window is not None:
+            self.popup_window.destroy()
+        
+        self.popup_window = tk.Toplevel(self)
+        self.popup_window.title("Informacja")
+        self.popup_window.geometry("200x100")
+        self.popup_window.resizable(False, False)
+        self.popup_label = tk.Label(self.popup_window, text=text)
+        self.popup_label.pack(fill=tk.BOTH, expand=True)
+        self.popup_window.grab_set()
 
 
+
+    def save_file(self):
+        if self.file_name is None:
+            self.save_file_as()
+            return
+        with open(self.file_name, "w") as f:
+            json.dump(self.teachers, f)
+        self.show_popup_window("Zapisano plik")
+        
+    def save_file_as(self):
+        self.file_name = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])
+        with open(self.file_name, "w") as f:
+            json.dump(self.teachers, f)
+        self.show_popup_window("Zapisano plik")
+        
+
+    def open_file(self):
+        self.file_name = filedialog.askopenfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])
+        with open(self.file_name, "r") as f:
+            self.teachers = json.load(f)
+        self.combo["values"] = [teacher for teacher in self.teachers]
+        self.combo.current(len(self.teachers)-1)
+        self.update_schedule()
 
     def create_bar(self):
         self.bar = tk.Frame(self)
