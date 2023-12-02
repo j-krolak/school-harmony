@@ -65,7 +65,7 @@ class HomePage(tk.Frame):
     def update_scedule(self, event=None):
         for day in range(5):
             for hour in range(8):
-                if day * 5 + hour in self.teachers[self.combo.get()]:
+                if day * 8 + hour in self.teachers[self.combo.get()]:
                     self.check_btns_state[day][hour].set(1)
                     self.check_btns[day][hour].config(bg="green")
                 else:
@@ -105,10 +105,17 @@ class HomePage(tk.Frame):
                 self.check_btns[day][hour].pack(fill=tk.BOTH, expand=True)
                 self.frm_check_btns[day][hour].grid(row=day+1, column=hour+1, sticky=tk.NSEW)
 
+    def calculate_optimal_solution(self):
+        pass
+
+    def create_calculate_btn(self):
+        self.btn_calculate = ttk.Button(master=self, text="Oblicz", command=self.calculate_optimal_solution)
+        self.btn_calculate.pack(pady=20)
 
     def create_widgets(self):
         self.create_bar()
         self.create_schedule()
+        self.create_calculate_btn()
 
 
 if __name__ == "__main__":
