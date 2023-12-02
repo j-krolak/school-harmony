@@ -28,6 +28,7 @@ class HomePage(tk.Frame):
         self.ent_add_teacher.delete(0, tk.END)
         self.combo["values"] = [teacher for teacher in self.teachers]
         self.combo.current(len(self.teachers)-1)
+        self.update_scedule()
 
     def create_bar(self):
         self.bar = tk.Frame(self)
@@ -41,6 +42,7 @@ class HomePage(tk.Frame):
         self.lbl_teacher = tk.Label(self.bar, text="Nauczyciel")
         self.lbl_teacher.grid(row=0, column=0, sticky=tk.S)
         self.combo = ttk.Combobox(master=self.bar, state="readonly")
+        self.combo.bind("<<ComboboxSelected>>", self.update_scedule)
         self.combo["values"] = [teacher[0] for teacher in self.teachers]
         self.combo.grid(row=1, column=0)
 
@@ -55,9 +57,21 @@ class HomePage(tk.Frame):
         for day in range(5):
             for hour in range(8):
                 if self.check_btns_state[day][hour].get() == 1:
+                    self.check_btns[day][hour].config(bg="green")
                     self.teachers[self.combo.get()].append(day * 5 + hour)
+                else:
+                    self.check_btns[day][hour].config(bg="red")
         
-    
+    def update_scedule(self, event=None):
+        for day in range(5):
+            for hour in range(8):
+                if day * 5 + hour in self.teachers[self.combo.get()]:
+                    self.check_btns_state[day][hour].set(1)
+                    self.check_btns[day][hour].config(bg="green")
+                else:
+                    self.check_btns_state[day][hour].set(0)
+                    self.check_btns[day][hour].config(bg="red")
+
 
     def create_schedule(self):
         self.frm_schedule = tk.Frame(self)
@@ -76,7 +90,7 @@ class HomePage(tk.Frame):
         for i in range(0,8):
             tk.Label(text=f"{i+1}\n{HOURS[i]}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=0, column=i+1, sticky=tk.NSEW)
 
-        # For each cell, create a checkbox
+        # For each cell, create checkbox and frame
 
         self.check_btns = [[[] for _ in range(8)] for _ in range(5)]
         self.check_btns_state  = [[tk.IntVar() for _ in range(8)] for _ in range(5)]
@@ -86,7 +100,7 @@ class HomePage(tk.Frame):
         for day in range(5):
             for hour in range(8):
                 self.frm_check_btns[day][hour] = tk.Frame(master=self.frm_schedule, highlightbackground="black", highlightthickness=1)
-                self.check_btns[day][hour] = tk.Checkbutton(master=self.frm_check_btns[day][hour], variable=self.check_btns_state[day][hour], onvalue=1, offvalue=0, command=self.handle_checkbox_change)
+                self.check_btns[day][hour] = tk.Checkbutton(master=self.frm_check_btns[day][hour], variable=self.check_btns_state[day][hour], onvalue=1, offvalue=0, bg="red", command=self.handle_checkbox_change)
 
                 self.check_btns[day][hour].pack(fill=tk.BOTH, expand=True)
                 self.frm_check_btns[day][hour].grid(row=day+1, column=hour+1, sticky=tk.NSEW)
