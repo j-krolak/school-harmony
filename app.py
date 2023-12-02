@@ -1,4 +1,5 @@
 from tkinter import ttk
+from utils import *
 import tkinter as tk
 
 DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
@@ -58,7 +59,7 @@ class HomePage(tk.Frame):
             for hour in range(8):
                 if self.check_btns_state[day][hour].get() == 1:
                     self.check_btns[day][hour].config(bg="green")
-                    self.teachers[self.combo.get()].append(day * 5 + hour)
+                    self.teachers[self.combo.get()].append(day * 8 + hour)
                 else:
                     self.check_btns[day][hour].config(bg="red")
         
@@ -104,9 +105,14 @@ class HomePage(tk.Frame):
 
                 self.check_btns[day][hour].pack(fill=tk.BOTH, expand=True)
                 self.frm_check_btns[day][hour].grid(row=day+1, column=hour+1, sticky=tk.NSEW)
-
+    
+    def convert_teachers_to_teacher_data(self):
+        return [TeacherData(teacher,self.teachers[teacher]) for teacher in self.teachers]
+    
     def calculate_optimal_solution(self):
-        pass
+        teachers_data = self.convert_teachers_to_teacher_data()
+        self.optimal_values = find_optimal_solution(teachers_data)
+        display_solution(teachers_data, self.optimal_values)
 
     def create_calculate_btn(self):
         self.btn_calculate = ttk.Button(master=self, text="Oblicz", command=self.calculate_optimal_solution)

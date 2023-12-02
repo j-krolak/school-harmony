@@ -121,16 +121,3 @@ def find_optimal_solution(teachers_data: list[TeacherData]) -> (float, float):
         raise Exception("The correct solution doesn't exist!")
     return (minimal_dis,maximal_dis)
 
-teachers_data = [
-    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-]
-
-
-optimal_values = find_optimal_solution(teachers_data)
-display_solution(teachers_data, optimal_values)
