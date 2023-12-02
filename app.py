@@ -12,14 +12,25 @@ class App(tk.Tk):
         self.title("School Harmony")
         self.geometry("1200x800")
         self.resizable(True, True)
+        self.teachers = {}
+        self.create_menu()
 
-        HomePage(self)
+        HomePage(self, self.teachers)
+    
+    def create_menu(self):
+        self.menubar = tk.Menu(self)
+        self.filemenu = tk.Menu(self.menubar, tearoff=0)
+        self.filemenu.add_command(label="Otwórz")
+        self.filemenu.add_command(label="Zapisz")
+
+        self.menubar.add_cascade(label="Plik", menu=self.filemenu)
+        self.config(menu=self.menubar)
 
 class HomePage(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, teachers):
+        self.teachers = teachers
         super().__init__(master)
         self.master = master
-        self.teachers = {}
         self.pack(fill=tk.BOTH)
         self.create_widgets()
         self.win_add_teacher = ''
@@ -30,6 +41,8 @@ class HomePage(tk.Frame):
         self.combo["values"] = [teacher for teacher in self.teachers]
         self.combo.current(len(self.teachers)-1)
         self.update_schedule()
+
+
 
     def create_bar(self):
         self.bar = tk.Frame(self)

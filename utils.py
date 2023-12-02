@@ -1,5 +1,7 @@
 from pulp import *
 
+NUM_OF_DUTY_HOURS = 1
+
 class TeacherData:
     def __init__(self, name: str, hours: list[int]) -> None:
         self.hours = hours
@@ -44,10 +46,10 @@ def get_solution(teachers_data: list[TeacherData] , minimal_dis: float, maximal_
                 # Set constraints to exclude hours when the employer doesn't work
                 model += teachers_dict[teacher_id][hour] == 0
 
-    # Set constraints to ensure that exactly one employer works each hour.
+    # Set constraints to ensure that exactly NUM_OF_DUTY_HOURS employer works each hour.
     for hour in HOURS:
-        model += lpSum([ teachers_dict[teacher_id][hour] for teacher_id in TEACHERS]) == 1
-    model += lpSum([teachers_dict[teacher_id][hour] for teacher_id in TEACHERS for hour in HOURS]) == MAX_HOURS
+        model += lpSum([ teachers_dict[teacher_id][hour] for teacher_id in TEACHERS]) == NUM_OF_DUTY_HOURS
+    model += lpSum([teachers_dict[teacher_id][hour] for teacher_id in TEACHERS for hour in HOURS]) == MAX_HOURS * NUM_OF_DUTY_HOURS
     
     model.solve(PULP_CBC_CMD(msg=0))
 
