@@ -1,6 +1,6 @@
 from pulp import *
 
-class Teacher_Data:
+class TeacherData:
     def __init__(self, name: str, hours: list[int]) -> None:
         self.hours = hours
         self.name = name
@@ -18,7 +18,7 @@ def get_shift_weight(shift: int):
 
 
 
-def get_solution(teachers_data: list[Teacher_Data] , minimal_dis: float, maximal_dis: float) -> bool | list[list[int]]:
+def get_solution(teachers_data: list[TeacherData] , minimal_dis: float, maximal_dis: float) -> bool | list[list[int]]:
     TEACHERS = range(len(teachers_data))
     MAX_HOURS = 0 
 
@@ -77,7 +77,7 @@ def get_solution(teachers_data: list[Teacher_Data] , minimal_dis: float, maximal
 
     return result
 
-def display_solution(teachers_data: list[Teacher_Data] ,optimal_values: (float, float)):
+def display_solution(teachers_data: list[TeacherData] ,optimal_values: (float, float)):
     optimal_solution = get_solution(teachers_data, optimal_values[0], optimal_values[1])
     for teacher_id in range(len(teachers_data)):
         print(f"{teachers_data[teacher_id].name}: ")
@@ -86,7 +86,7 @@ def display_solution(teachers_data: list[Teacher_Data] ,optimal_values: (float, 
         print()
 
 # TODO: Find optimal values using binary search!
-def find_optimal_solution(teachers_data: list[Teacher_Data]) -> (float, float): 
+def find_optimal_solution(teachers_data: list[TeacherData]) -> (float, float): 
     step = 1/max([sum(get_shift_weight(shift) for shift in teacher.hours ) for teacher in teachers_data])
     maximal_dis = 1
 
@@ -122,13 +122,13 @@ def find_optimal_solution(teachers_data: list[Teacher_Data]) -> (float, float):
     return (minimal_dis,maximal_dis)
 
 teachers_data = [
-    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
-    Teacher_Data("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
+    TeacherData("Mr. X",[0, 1, 2, 3, 4, 5, 6, 7 ]),
 ]
 
 
