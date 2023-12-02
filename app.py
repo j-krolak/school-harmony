@@ -29,7 +29,7 @@ class HomePage(tk.Frame):
         self.ent_add_teacher.delete(0, tk.END)
         self.combo["values"] = [teacher for teacher in self.teachers]
         self.combo.current(len(self.teachers)-1)
-        self.update_scedule()
+        self.update_schedule()
 
     def create_bar(self):
         self.bar = tk.Frame(self)
@@ -43,7 +43,7 @@ class HomePage(tk.Frame):
         self.lbl_teacher = tk.Label(self.bar, text="Nauczyciel")
         self.lbl_teacher.grid(row=0, column=0, sticky=tk.S)
         self.combo = ttk.Combobox(master=self.bar, state="readonly")
-        self.combo.bind("<<ComboboxSelected>>", self.update_scedule)
+        self.combo.bind("<<ComboboxSelected>>", self.update_schedule)
         self.combo["values"] = [teacher[0] for teacher in self.teachers]
         self.combo.grid(row=1, column=0)
 
@@ -54,6 +54,11 @@ class HomePage(tk.Frame):
         self.btn_add_teacher.grid(row=1, column=3, sticky=tk.W)
 
     def handle_checkbox_change(self):
+        if self.combo.get() == "":
+            for day in range(5):
+                for hour in range(8):
+                    self.check_btns_state[day][hour].set(0)
+            return
         self.teachers[self.combo.get()] = []
         for day in range(5):
             for hour in range(8):
@@ -63,7 +68,7 @@ class HomePage(tk.Frame):
                 else:
                     self.check_btns[day][hour].config(bg="red")
         
-    def update_scedule(self, event=None):
+    def update_schedule(self, event=None):
         for day in range(5):
             for hour in range(8):
                 if day * 8 + hour in self.teachers[self.combo.get()]:
@@ -110,6 +115,8 @@ class HomePage(tk.Frame):
         return [TeacherData(teacher,self.teachers[teacher]) for teacher in self.teachers]
     
     def calculate_optimal_solution(self):
+        if self.combo.get() == "":
+            return
         teachers_data = self.convert_teachers_to_teacher_data()
         self.optimal_values = find_optimal_solution(teachers_data)
         display_solution(teachers_data, self.optimal_values)
