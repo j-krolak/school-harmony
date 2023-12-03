@@ -47,10 +47,29 @@ class HomePage(tk.Frame):
         self.win_add_teacher = ''
         self.file_name = None
         self.popup_window = None
+    def show_add_teacher_window(self):
+        if self.popup_window is not None:
+            self.popup_window.destroy()
+        
+        self.popup_window = tk.Toplevel(self)
+        self.popup_window.title("Nowy nauczyciel")
+        self.popup_window.geometry("200x100")
+        self.popup_window.resizable(False, False)
+        
+        self.popup_label = tk.Label(self.popup_window, text="Imię i nazwisko")
+        self.popup_label.pack(pady=5, expand=True)
+
+        self.popup_entry = tk.Entry(self.popup_window)
+        self.popup_entry.pack(pady=5, expand=True)
+
+        self.popup_btn = tk.Button(self.popup_window, text="Dodaj", command=self.add_teacher)
+        self.popup_btn.pack(pady=5, expand=True)
+
+        self.popup_window.grab_set()
 
     def add_teacher(self):
-        self.teachers[self.ent_add_teacher.get()] =  []
-        self.ent_add_teacher.delete(0, tk.END)
+        self.teachers[self.popup_entry.get()] =  []
+        self.popup_entry.delete(0, tk.END)
         self.combo["values"] = [teacher for teacher in self.teachers]
         self.combo.current(len(self.teachers)-1)
         self.update_schedule()
@@ -110,10 +129,13 @@ class HomePage(tk.Frame):
         self.combo["values"] = [teacher[0] for teacher in self.teachers]
         self.combo.grid(row=1, column=0)
 
-        self.ent_add_teacher = tk.Entry(self.bar)
-        self.ent_add_teacher.grid(row=1, column=2, sticky=tk.E)
+        # self.ent_add_teacher = tk.Entry(self.bar)
+        # self.ent_add_teacher.grid(row=1, column=2, sticky=tk.E)
 
-        self.btn_add_teacher = ttk.Button(master=self.bar, text="Dodaj nauczyciela", command=self.add_teacher)
+        self.btn_delete_teacher = ttk.Button(master=self.bar, text="Usuń nauczyciela")
+        self.btn_delete_teacher.grid(row=1, column=2, sticky=tk.E)
+
+        self.btn_add_teacher = ttk.Button(master=self.bar, text="Dodaj nauczyciela", command=self.show_add_teacher_window)
         self.btn_add_teacher.grid(row=1, column=3, sticky=tk.W)
 
     def handle_checkbox_change(self):
