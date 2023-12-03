@@ -98,6 +98,10 @@ class HomePage(tk.Frame):
         
     def save_file_as(self):
         self.file_name = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])
+        if self.file_name == "":
+            self.file_name = None
+            self.show_popup_window("Nie wybrano pliku")
+            return
         with open(self.file_name, "w") as f:
             json.dump(self.teachers, f)
         self.show_popup_window("Zapisano plik")
