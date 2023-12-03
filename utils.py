@@ -1,7 +1,7 @@
 from pulp import *
 
 NUM_OF_DUTY_HOURS = 1
-DELTA = 1/10000
+DELTA = 1/400
 
 class TeacherData:
     def __init__(self, name: str, hours: list[int]) -> None:
