@@ -67,6 +67,34 @@ class HomePage(tk.Frame):
 
         self.popup_window.grab_set()
 
+    def show_delete_teacher_window(self):
+        if self.popup_window is not None:
+            self.popup_window.destroy()
+        
+        self.popup_window = tk.Toplevel(self)
+        self.popup_window.title("Usuń nauczyciela")
+        self.popup_window.geometry("300x100")
+        self.popup_window.resizable(False, False)
+        
+        self.popup_label = tk.Label(self.popup_window, text=f"Czy napewno chcecz usunąć nauczyciela\n {self.combo.get()}?")
+        self.popup_label.pack(pady=5, expand=True)
+
+        self.popup_btn = tk.Button(self.popup_window, text="TAK", command=self.delete_teacher)
+        self.popup_btn.pack(pady=5)
+
+        self.popup_window.grab_set()
+    
+    def delete_teacher(self):
+        del self.teachers[self.combo.get()]
+        self.combo["values"] = [teacher for teacher in self.teachers]
+        if len(self.teachers) == 0:
+            self.combo.set("")
+        else:
+            self.combo.current(len(self.teachers)-1)
+        self.update_schedule()
+        self.popup_window.destroy()
+
+
     def add_teacher(self):
         self.teachers[self.popup_entry.get()] =  []
         self.popup_entry.delete(0, tk.END)
@@ -136,7 +164,7 @@ class HomePage(tk.Frame):
         # self.ent_add_teacher = tk.Entry(self.bar)
         # self.ent_add_teacher.grid(row=1, column=2, sticky=tk.E)
 
-        self.btn_delete_teacher = ttk.Button(master=self.bar, text="Usuń nauczyciela")
+        self.btn_delete_teacher = ttk.Button(master=self.bar, text="Usuń nauczyciela", command=self.show_delete_teacher_window)
         self.btn_delete_teacher.grid(row=1, column=2, sticky=tk.E)
 
         self.btn_add_teacher = ttk.Button(master=self.bar, text="Dodaj nauczyciela", command=self.show_add_teacher_window)
@@ -160,7 +188,7 @@ class HomePage(tk.Frame):
     def update_schedule(self, event=None):
         for day in range(5):
             for hour in range(8):
-                if day * 8 + hour in self.teachers[self.combo.get()]:
+                if self.combo.get() !="" and day * 8 + hour in self.teachers[self.combo.get()]:
                     self.check_btns_state[day][hour].set(1)
                     self.check_btns[day][hour].config(bg="green")
                 else:
