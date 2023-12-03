@@ -4,8 +4,6 @@ from utils import *
 import json
 from tkinter import filedialog
 
-DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
-HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]
 
 
 class App(tk.Tk):
@@ -67,9 +65,12 @@ class HomePage(tk.Frame):
 
         self.popup_window.grab_set()
 
-    def show_delete_teacher_window(self):
+    def reset_popup_window(self):
         if self.popup_window is not None:
             self.popup_window.destroy()
+            self.popup_window = None
+    def show_delete_teacher_window(self):
+        self.reset_popup_window()
         
         self.popup_window = tk.Toplevel(self)
         self.popup_window.title("Usuń nauczyciela")
@@ -103,8 +104,8 @@ class HomePage(tk.Frame):
         self.update_schedule()
     
     def show_popup_window(self, text):
-        if self.popup_window is not None:
-            self.popup_window.destroy()
+        self.reset_popup_window()
+
         
         self.popup_window = tk.Toplevel(self)
         self.popup_window.title("Informacja")
@@ -231,12 +232,38 @@ class HomePage(tk.Frame):
     def convert_teachers_to_teacher_data(self):
         return [TeacherData(teacher,self.teachers[teacher]) for teacher in self.teachers]
     
+    def display_solution(self, teachers_data: list[TeacherData] ,optimal_values: (float, float)):
+        optimal_solution = get_solution(teachers_data, optimal_values[0], optimal_values[1])
+
+        self.reset_popup_window()
+        self.popup_window = tk.Toplevel(self)
+        self.popup_window.geometry("500x800")
+        result_label  = tk.Label(self.popup_window, text="Wynik:\n")
+        
+        for teacher_id in range(len(teachers_data)):
+            hours_str = ""
+
+            all = 0
+            for hour in teachers_data[teacher_id].hours:
+                all += get_shift_weight(hour)
+            x = 0
+            for hour in optimal_solution[teacher_id]:
+                hours_str += f"{index_to_hour(hour)}\n"
+                x += get_shift_weight(hour)
+
+            result_label["text"] += f"{teachers_data[teacher_id].name} {round(x/all, 4)}:\n {hours_str}"
+        result_label.pack(pady=10)
+        self.popup_window.title("Wynik")
+        self.popup_window.grab_set()
+
     def calculate_optimal_solution(self):
         if self.combo.get() == "":
             return
+        self.btn_calculate.config(state="disabled")
         teachers_data = self.convert_teachers_to_teacher_data()
         self.optimal_values = find_optimal_solution(teachers_data)
-        display_solution(teachers_data, self.optimal_values)
+        self.display_solution(teachers_data, self.optimal_values)
+        self.btn_calculate.config(state="enable")
 
     def create_calculate_btn(self):
         self.btn_calculate = ttk.Button(master=self, text="Oblicz", command=self.calculate_optimal_solution)

@@ -2,6 +2,8 @@ from pulp import *
 
 NUM_OF_DUTY_HOURS = 1
 DELTA = 1/400
+DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
+HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]
 
 class TeacherData:
     def __init__(self, name: str, hours: list[int]) -> None:
@@ -18,7 +20,10 @@ def get_shift_weight(shift: int):
         return 20
     return 5
     
-
+def index_to_hour(index: int) -> str:
+    day = DAYS[index // 8]
+    hour = HOURS[index % 8]
+    return f"{day} {hour}"
 
 
 def get_solution(teachers_data: list[TeacherData] , minimal_dis: float, maximal_dis: float) -> bool | list[list[int]]:
