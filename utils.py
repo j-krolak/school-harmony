@@ -104,6 +104,17 @@ def display_solution(teachers_data: list[TeacherData] ,optimal_values: (float, f
         print(f"Optimal ratio: {round(x/all, 4)}")
 
 
+def solution_to_dict(teachers_data: list[TeacherData], optimal_values: (float, float)) -> dict[str, list[int]]:
+    optimal_solution = get_solution(teachers_data, optimal_values[0], optimal_values[1])
+    result = {}
+    for teacher_id in range(len(teachers_data)):
+        result[teachers_data[teacher_id].name] = []
+        for hour in teachers_data[teacher_id].hours:
+            if hour in optimal_solution[teacher_id]:
+                result[teachers_data[teacher_id].name].append(hour)
+    return result
+
+
 def find_optimal_minimal(teachers_data: list[TeacherData], high=1) -> float:
     low = 0
     mid = (low+high)/2

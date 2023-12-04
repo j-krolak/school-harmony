@@ -36,10 +36,9 @@ class App(tk.Tk):
         self.config(menu=self.menubar)
 
 class SolutionWindow(tk.Toplevel):
-    def __init__(self, master, teachers_data: list[TeacherData], solution: list[list[int]]):
+    def __init__(self, master, solution: dict[str, list[int]]):
         super().__init__(master)
         self.solution = solution
-        self.teachers_data = teachers_data
         self.title("Rozwiązanie")
         self.geometry("1200x800")
         self.resizable(False, False)
@@ -54,7 +53,24 @@ class SolutionWindow(tk.Toplevel):
         self.combo = ttk.Combobox(self, values=DAYS, state="readonly")
         self.combo.current(0)
         self.combo.pack(pady=10)
+        self.combo.bind("<<ComboboxSelected>>", self.update_schedule)
     
+    def clear_schedule(self):
+        for row in self.schedule_labels:
+            for label in row:
+                label.config(text="")
+
+    def update_schedule(self, event=None):
+        self.clear_schedule()
+        day = self.combo.get()
+        for teacher, hours in self.solution.items():
+            for shift in hours:
+                if shift_index_to_day(shift) == day:
+                    shift_num = 0
+                    while self.schedule_labels[shift % 8][shift_num]["text"] != "":
+                        shift_num += 1
+                    self.schedule_labels[shift % 8][shift_num].config(text=teacher)
+
     def create_schedule(self):
         self.frm_schedule = tk.Frame(self)
         self.frm_schedule.columnconfigure([i for i in range(NUM_OF_SHIFTS+1)], minsize=100, weight=1)
@@ -72,13 +88,15 @@ class SolutionWindow(tk.Toplevel):
         for i in range(0,8):
             tk.Label(text=f"{i+1}\n{HOURS[i]}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=i+1, sticky=tk.NSEW)
 
-        # For each cell, create frame
-        self.schedule_frames = [[[] for _ in range(NUM_OF_SHIFTS)] for _ in range(8)]
+        # For each cell, create label
+        self.schedule_labels = [[[] for _ in range(NUM_OF_SHIFTS)] for _ in range(8)]
         
         for shift in range(NUM_OF_SHIFTS):
             for hour in range(8):
-                self.schedule_frames[hour][shift] = tk.Frame(master=self.frm_schedule, highlightbackground="black", highlightthickness=1)
-                self.schedule_frames[hour][shift].grid(row=hour+1, column=shift+1, sticky=tk.NSEW)
+                self.schedule_labels[hour][shift] = tk.Label(master=self.frm_schedule, highlightbackground="black", highlightthickness=1, text="")
+                self.schedule_labels[hour][shift].grid(row=hour+1, column=shift+1, sticky=tk.NSEW)
+
+        self.update_schedule()
 
 
 class HomePage(tk.Frame):
@@ -286,7 +304,7 @@ class HomePage(tk.Frame):
             self.show_popup_window("Brak rozwiązania")
             return
         
-        self.solution_window = SolutionWindow(self,teachers_data, optimal_solution)
+        self.solution_window = SolutionWindow(self, solution_to_dict(teachers_data, optimal_values))
         # self.reset_popup_window()
         # self.popup_window = tk.Toplevel(self)
         # self.popup_window.geometry("500x800")
