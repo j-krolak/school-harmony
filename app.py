@@ -47,7 +47,13 @@ class SolutionWindow(tk.Toplevel):
         self.create_widgets()
 
     def create_widgets(self):
-        pass
+        self.create_combo_of_days()
+        
+    def create_combo_of_days(self):
+        self.combo = ttk.Combobox(self, values=DAYS, state="readonly")
+        self.combo.current(0)
+        self.combo.pack(pady=10)
+
 
 class HomePage(tk.Frame):
     def __init__(self, master):
@@ -59,6 +65,7 @@ class HomePage(tk.Frame):
         self.win_add_teacher = ''
         self.file_name = None
         self.popup_window = None
+
     def show_add_teacher_window(self):
         if self.popup_window is not None:
             self.popup_window.destroy()
