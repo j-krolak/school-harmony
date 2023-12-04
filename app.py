@@ -304,27 +304,26 @@ class HomePage(tk.Frame):
             self.show_popup_window("Brak rozwiązania")
             return
         
-        self.solution_window = SolutionWindow(self, solution_to_dict(teachers_data, optimal_values))
-        # self.reset_popup_window()
-        # self.popup_window = tk.Toplevel(self)
-        # self.popup_window.geometry("500x800")
-        # result_label  = tk.Label(self.popup_window, text="Wynik:\n")
+        self.reset_popup_window()
+        self.popup_window = tk.Toplevel(self)
+        self.popup_window.geometry("500x800")
+        result_label  = tk.Label(self.popup_window, text="Wynik:\n")
         
-        # for teacher_id in range(len(teachers_data)):
-        #     hours_str = ""
+        for teacher_id in range(len(teachers_data)):
 
-        #     all = 0
-        #     for hour in teachers_data[teacher_id].hours:
-        #         all += get_shift_weight(hour)
-        #     x = 0
-        #     for hour in optimal_solution[teacher_id]:
-        #         hours_str += f"{index_to_hour(hour)}\n"
-        #         x += get_shift_weight(hour)
+            all = 0
+            for hour in teachers_data[teacher_id].hours:
+                all += get_shift_weight(hour)
+            x = 0
+            for hour in optimal_solution[teacher_id]:
+                x += get_shift_weight(hour)
 
-        #     result_label["text"] += f"{teachers_data[teacher_id].name} {round(x/all, 4)}:\n {hours_str}"
-        # result_label.pack(pady=10)
-        # self.popup_window.title("Wynik")
-        # self.popup_window.grab_set()
+            result_label["text"] += f"{teachers_data[teacher_id].name} {round(x/all, 4)}\n"
+        result_label.pack(pady=10)
+        self.popup_window.title("Proporcje")
+
+        self.solution_window = SolutionWindow(self, solution_to_dict(teachers_data, optimal_values))
+       
 
     def calculate_optimal_solution(self):
         if self.combo.get() == "":
