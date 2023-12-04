@@ -1,6 +1,6 @@
 from pulp import *
 
-NUM_OF_DUTY_HOURS = 1
+NUM_OF_SHIFTS = 1
 DELTA = 1/400
 DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
 HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]
@@ -57,10 +57,10 @@ def get_solution(teachers_data: list[TeacherData] , minimal_dis: float, maximal_
                 # Set constraints to exclude hours when the employer doesn't work
                 model += teachers_dict[teacher_id][hour] == 0
 
-    # Set constraints to ensure that exactly NUM_OF_DUTY_HOURS employer works each hour.
+    # Set constraints to ensure that exactly NUM_OF_SHIFTS employer works each hour.
     for hour in HOURS:
-        model += lpSum([ teachers_dict[teacher_id][hour] for teacher_id in TEACHERS]) == NUM_OF_DUTY_HOURS
-    model += lpSum([teachers_dict[teacher_id][hour] for teacher_id in TEACHERS for hour in HOURS]) == MAX_HOURS * NUM_OF_DUTY_HOURS
+        model += lpSum([ teachers_dict[teacher_id][hour] for teacher_id in TEACHERS]) == NUM_OF_SHIFTS
+    model += lpSum([teachers_dict[teacher_id][hour] for teacher_id in TEACHERS for hour in HOURS]) == MAX_HOURS * NUM_OF_SHIFTS
     
     model.solve(PULP_CBC_CMD(msg=0))
 
