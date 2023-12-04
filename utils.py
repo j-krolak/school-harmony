@@ -20,11 +20,16 @@ def get_shift_weight(shift: int):
         return 20
     return 5
     
-def index_to_hour(index: int) -> str:
-    day = DAYS[index // 8]
-    hour = HOURS[index % 8]
+def shift_index_to_str(index: int) -> str:
+    day = shift_index_to_day(index)
+    hour = shift_index_to_hour(index)
     return f"{day} {hour}"
 
+def shift_index_to_hour(index: int) -> str:
+    return HOURS[index % 8]
+
+def shift_index_to_day(index: int) -> str:
+    return DAYS[index // 8]
 
 def get_solution(teachers_data: list[TeacherData] , minimal_dis: float, maximal_dis: float) -> bool | list[list[int]]:
     TEACHERS = range(len(teachers_data))
