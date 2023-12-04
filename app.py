@@ -35,6 +35,20 @@ class App(tk.Tk):
         self.menubar.add_cascade(label="Plik", menu=self.filemenu)
         self.config(menu=self.menubar)
 
+class SolutionWindow(tk.Toplevel):
+    def __init__(self, master, teachers_data: list[TeacherData], solution: list[list[int]]):
+        super().__init__(master)
+        self.solution = solution
+        self.teachers_data = teachers_data
+        self.title("Rozwiązanie")
+        self.geometry("1200x800")
+        self.resizable(False, False)
+        self.grab_set()
+        self.create_widgets()
+
+    def create_widgets(self):
+        pass
+
 class HomePage(tk.Frame):
     def __init__(self, master):
         self.teachers = {}
@@ -235,26 +249,31 @@ class HomePage(tk.Frame):
     def display_solution(self, teachers_data: list[TeacherData] ,optimal_values: (float, float)):
         optimal_solution = get_solution(teachers_data, optimal_values[0], optimal_values[1])
 
-        self.reset_popup_window()
-        self.popup_window = tk.Toplevel(self)
-        self.popup_window.geometry("500x800")
-        result_label  = tk.Label(self.popup_window, text="Wynik:\n")
+        if type(optimal_solution) == bool:
+            self.show_popup_window("Brak rozwiązania")
+            return
         
-        for teacher_id in range(len(teachers_data)):
-            hours_str = ""
+        self.solution_window = SolutionWindow(self,teachers_data, optimal_solution)
+        # self.reset_popup_window()
+        # self.popup_window = tk.Toplevel(self)
+        # self.popup_window.geometry("500x800")
+        # result_label  = tk.Label(self.popup_window, text="Wynik:\n")
+        
+        # for teacher_id in range(len(teachers_data)):
+        #     hours_str = ""
 
-            all = 0
-            for hour in teachers_data[teacher_id].hours:
-                all += get_shift_weight(hour)
-            x = 0
-            for hour in optimal_solution[teacher_id]:
-                hours_str += f"{index_to_hour(hour)}\n"
-                x += get_shift_weight(hour)
+        #     all = 0
+        #     for hour in teachers_data[teacher_id].hours:
+        #         all += get_shift_weight(hour)
+        #     x = 0
+        #     for hour in optimal_solution[teacher_id]:
+        #         hours_str += f"{index_to_hour(hour)}\n"
+        #         x += get_shift_weight(hour)
 
-            result_label["text"] += f"{teachers_data[teacher_id].name} {round(x/all, 4)}:\n {hours_str}"
-        result_label.pack(pady=10)
-        self.popup_window.title("Wynik")
-        self.popup_window.grab_set()
+        #     result_label["text"] += f"{teachers_data[teacher_id].name} {round(x/all, 4)}:\n {hours_str}"
+        # result_label.pack(pady=10)
+        # self.popup_window.title("Wynik")
+        # self.popup_window.grab_set()
 
     def calculate_optimal_solution(self):
         if self.combo.get() == "":
