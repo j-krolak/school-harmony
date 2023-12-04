@@ -48,11 +48,37 @@ class SolutionWindow(tk.Toplevel):
 
     def create_widgets(self):
         self.create_combo_of_days()
-        
+        self.create_schedule()
+
     def create_combo_of_days(self):
         self.combo = ttk.Combobox(self, values=DAYS, state="readonly")
         self.combo.current(0)
         self.combo.pack(pady=10)
+    
+    def create_schedule(self):
+        self.frm_schedule = tk.Frame(self)
+        self.frm_schedule.columnconfigure([i for i in range(NUM_OF_DUTY_HOURS+1)], minsize=100, weight=1)
+        self.frm_schedule.rowconfigure([i for i in range(9)], minsize=60, weight=1)
+        self.frm_schedule.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
+    
+        tk.Frame(master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=0, column=0, sticky=tk.NSEW)
+
+        # Create labels for shifts
+        for i in range(NUM_OF_DUTY_HOURS):
+            tk.Label(text=f"{i}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=0, column=i+1, sticky=tk.NSEW)
+
+
+        # Create labels for hours
+        for i in range(0,8):
+            tk.Label(text=f"{i+1}\n{HOURS[i]}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=i+1, sticky=tk.NSEW)
+
+        # For each cell, create frame
+        self.schedule_frames = [[[] for _ in range(NUM_OF_DUTY_HOURS)] for _ in range(8)]
+        
+        for shift in range(NUM_OF_DUTY_HOURS):
+            for hour in range(8):
+                self.schedule_frames[hour][shift] = tk.Frame(master=self.frm_schedule, highlightbackground="black", highlightthickness=1)
+                self.schedule_frames[hour][shift].grid(row=hour+1, column=shift+1, sticky=tk.NSEW)
 
 
 class HomePage(tk.Frame):
