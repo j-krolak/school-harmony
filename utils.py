@@ -1,6 +1,8 @@
 from pulp import *
 
+#TODO: Create UI for customizing this values
 NUM_OF_SHIFTS = 1
+NAMES_OF_SHIFTS = ["0A", "0", "1A", "1"]
 DELTA = 1/400
 DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
 HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]

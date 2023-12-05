@@ -81,7 +81,7 @@ class SolutionWindow(tk.Toplevel):
 
         # Create labels for shifts
         for i in range(NUM_OF_SHIFTS):
-            tk.Label(text=f"{i}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=0, column=i+1, sticky=tk.NSEW)
+            tk.Label(text=f"{NAMES_OF_SHIFTS[i]}", master=self.frm_schedule, highlightbackground="black", highlightthickness=1).grid(row=0, column=i+1, sticky=tk.NSEW)
 
 
         # Create labels for hours
