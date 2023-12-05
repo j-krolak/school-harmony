@@ -38,7 +38,15 @@ class App(tk.Tk):
 class SolutionWindow(tk.Toplevel):
     def __init__(self, master, solution: dict[str, list[int]]):
         super().__init__(master)
-        self.solution = solution
+        self.solution = {}
+        counter = [0 for _ in range(len(DAYS) * len(HOURS))]
+
+        for teacher_id, shifts in solution.items():
+            self.solution[teacher_id] = []
+            for shift in shifts:
+                self.solution[teacher_id].append((shift, counter[shift]))
+                counter[shift] += 1
+
         self.title("Rozwiązanie")
         self.geometry("1200x800")
         self.resizable(False, False)
@@ -63,13 +71,10 @@ class SolutionWindow(tk.Toplevel):
     def update_schedule(self, event=None):
         self.clear_schedule()
         day = self.combo.get()
-        for teacher, hours in self.solution.items():
-            for shift in hours:
-                if shift_index_to_day(shift) == day:
-                    shift_num = 0
-                    while self.schedule_labels[shift % 8][shift_num]["text"] != "":
-                        shift_num += 1
-                    self.schedule_labels[shift % 8][shift_num].config(text=teacher)
+        for teacher, shifts in self.solution.items():
+            for shift in shifts:
+                if shift_index_to_day(shift[0]) == day:
+                    self.schedule_labels[shift[0] % 8][shift[1]].config(text=teacher)
 
     def create_schedule(self):
         self.frm_schedule = tk.Frame(self)
