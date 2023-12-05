@@ -1,6 +1,6 @@
 from pulp import *
 
-NUM_OF_DUTY_HOURS = 1
+NUM_OF_SHIFTS = 1
 DELTA = 1/400
 DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
 HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]
@@ -20,11 +20,16 @@ def get_shift_weight(shift: int):
         return 20
     return 5
     
-def index_to_hour(index: int) -> str:
-    day = DAYS[index // 8]
-    hour = HOURS[index % 8]
+def shift_index_to_str(index: int) -> str:
+    day = shift_index_to_day(index)
+    hour = shift_index_to_hour(index)
     return f"{day} {hour}"
 
+def shift_index_to_hour(index: int) -> str:
+    return HOURS[index % 8]
+
+def shift_index_to_day(index: int) -> str:
+    return DAYS[index // 8]
 
 def get_solution(teachers_data: list[TeacherData] , minimal_dis: float, maximal_dis: float) -> bool | list[list[int]]:
     TEACHERS = range(len(teachers_data))
@@ -52,10 +57,10 @@ def get_solution(teachers_data: list[TeacherData] , minimal_dis: float, maximal_
                 # Set constraints to exclude hours when the employer doesn't work
                 model += teachers_dict[teacher_id][hour] == 0
 
-    # Set constraints to ensure that exactly NUM_OF_DUTY_HOURS employer works each hour.
+    # Set constraints to ensure that exactly NUM_OF_SHIFTS employer works each hour.
     for hour in HOURS:
-        model += lpSum([ teachers_dict[teacher_id][hour] for teacher_id in TEACHERS]) == NUM_OF_DUTY_HOURS
-    model += lpSum([teachers_dict[teacher_id][hour] for teacher_id in TEACHERS for hour in HOURS]) == MAX_HOURS * NUM_OF_DUTY_HOURS
+        model += lpSum([ teachers_dict[teacher_id][hour] for teacher_id in TEACHERS]) == NUM_OF_SHIFTS
+    model += lpSum([teachers_dict[teacher_id][hour] for teacher_id in TEACHERS for hour in HOURS]) == MAX_HOURS * NUM_OF_SHIFTS
     
     model.solve(PULP_CBC_CMD(msg=0))
 
@@ -99,6 +104,17 @@ def display_solution(teachers_data: list[TeacherData] ,optimal_values: (float, f
         print(f"Optimal ratio: {round(x/all, 4)}")
 
 
+def solution_to_dict(teachers_data: list[TeacherData], optimal_values: (float, float)) -> dict[str, list[int]]:
+    optimal_solution = get_solution(teachers_data, optimal_values[0], optimal_values[1])
+    result = {}
+    for teacher_id in range(len(teachers_data)):
+        result[teachers_data[teacher_id].name] = []
+        for hour in teachers_data[teacher_id].hours:
+            if hour in optimal_solution[teacher_id]:
+                result[teachers_data[teacher_id].name].append(hour)
+    return result
+
+
 def find_optimal_minimal(teachers_data: list[TeacherData], high=1) -> float:
     low = 0
     mid = (low+high)/2
@@ -136,6 +152,6 @@ def find_optimal_solution(teachers_data: list[TeacherData]) -> (float, float):
     maximal_dis = find_optimal_maximal(teachers_data, minimal_dis)
 
     if maximal_dis > 1 or minimal_dis < 0 or not get_solution(teachers_data,minimal_dis, maximal_dis):
-        raise Exception("The correct solution doesn't exist!")
+        return (1, 1)
     return (minimal_dis,maximal_dis)
 
