@@ -1,17 +1,21 @@
 from pulp import *
 
-#TODO: Create UI for customizing this values
 NUM_OF_SHIFTS = 7
-NAMES_OF_SHIFTS = ["Wejście A", "Wejście C", "Szatnia", "Piętro 1 - Hol", "Piętro 1 - Stara część", "Piętro 2 - Hol", "Piętro 2 - stara część", "Patio"]
+NAMES_OF_SHIFTS = ["Wejście A", "Wejście C", "Szatnia", "Piętro 1 - Hol", "Piętro 1 - Stara część", "Piętro 2 - Hol", "Piętro 2 - stara część"]
 DELTA = 1/400
 DAYS = ["Pn", "Wt", "Śr", "Czw", "Pi"]
 HOURS  = ["8:45-8:55", "9:40-9:50", "10:35-10:55", "11:40-11:50", "12:35-12:45", "13:30-13:35", "14:20-14:25", "15:10-15:15"]
 
 class TeacherData:
-    def __init__(self, name: str, hours: list[int]) -> None:
-        self.hours = hours
+    def __init__(self, name: str, shifts: list[(int, str)]) -> None:
+        self.hours = [shift[0] for shift in shifts] 
+        self.shifts = shifts
         self.name = name
-
+    def hour_to_shift_name(self, hour: int) -> str:
+        for shift in self.shifts:
+            if shift[0] == hour:
+                return shift[1]
+    
 def get_shift_weight(shift: int):
     ten_minutes_shift = [0, 1, 3, 4]
     long_shift = [2]
@@ -113,7 +117,8 @@ def solution_to_dict(teachers_data: list[TeacherData], optimal_values: (float, f
         result[teachers_data[teacher_id].name] = []
         for hour in teachers_data[teacher_id].hours:
             if hour in optimal_solution[teacher_id]:
-                result[teachers_data[teacher_id].name].append(hour)
+                shift_name = teachers_data[teacher_id].hour_to_shift_name(hour)
+                result[teachers_data[teacher_id].name].append([hour, shift_name])
     return result
 
 

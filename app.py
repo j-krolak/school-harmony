@@ -36,16 +36,27 @@ class App(tk.Tk):
         self.config(menu=self.menubar)
 
 class SolutionWindow(tk.Toplevel):
-    def __init__(self, master, solution: dict[str, list[int]]):
+    def __init__(self, master, solution: dict[str, list[int, str]]):
         super().__init__(master)
         self.solution = {}
-        counter = [0 for _ in range(len(DAYS) * len(HOURS))]
+        is_shift_free = [[True for i in range(NUM_OF_SHIFTS)] for _ in range(len(DAYS) * len(HOURS))]
 
         for teacher_id, shifts in solution.items():
             self.solution[teacher_id] = []
             for shift in shifts:
-                self.solution[teacher_id].append((shift, counter[shift]))
-                counter[shift] += 1
+                index_of_shift = NAMES_OF_SHIFTS.index(shift[1])
+                for i in range(NUM_OF_SHIFTS):
+                    if index_of_shift - i >= 0 and is_shift_free[shift[0]][index_of_shift - i]:
+                        is_shift_free[shift[0]][index_of_shift - i] = False
+                        index_of_shift = index_of_shift - i
+                        break
+
+                    if index_of_shift + i < NUM_OF_SHIFTS and is_shift_free[shift[0]][index_of_shift + i]:
+                        is_shift_free[shift[0]][index_of_shift - i] = False
+                        index_of_shift = index_of_shift + i
+                        break
+
+                self.solution[teacher_id].append((shift[0], index_of_shift))
 
         self.title("Rozwiązanie")
         self.geometry("1200x800")
@@ -241,30 +252,60 @@ class HomePage(tk.Frame):
         self.btn_add_teacher = ttk.Button(master=self.bar, text="Dodaj nauczyciela", command=self.show_add_teacher_window)
         self.btn_add_teacher.grid(row=1, column=3, sticky=tk.W)
 
-    def handle_checkbox_change(self):
+    def handle_shift_name_input(self, day, hour):
+        self.check_btns[day][hour].config(text=self.popup_combo.get()) 
+        self.teachers[self.combo.get()].append((day * 8 + hour, self.popup_combo.get()))
+        self.popup_window.destroy()
+
+    
+    def get_shift_name_from_user(self, day, hour):
+        self.reset_popup_window()
+
+        
+        self.popup_window = tk.Toplevel(self)
+        self.popup_window.title("Preferowane piętro")
+        self.popup_window.geometry("200x100")
+        self.popup_window.resizable(False, False)
+        self.popup_label = tk.Label(self.popup_window, text="Wybierz preferowane piętro")
+        self.popup_label.pack()
+        self.popup_combo = ttk.Combobox(master=self.popup_window, values=[NAMES_OF_SHIFTS[i] for i in range(NUM_OF_SHIFTS)], state="readonly")
+        self.popup_combo.current(0)
+        self.popup_combo.pack()
+        self.popup_btn = tk.Button(self.popup_window, text="Zapisz", command=lambda: self.handle_shift_name_input(day, hour))
+        self.popup_btn.pack()
+        self.popup_window.grab_set()
+    
+    def handle_checkbox_change(self, event=None):
         if self.combo.get() == "":
             for day in range(5):
                 for hour in range(8):
                     self.check_btns_state[day][hour].set(0)
             return
+        
+        tmp_teacher = self.teachers[self.combo.get()]
         self.teachers[self.combo.get()] = []
         for day in range(5):
             for hour in range(8):
                 if self.check_btns_state[day][hour].get() == 1:
-                    self.check_btns[day][hour].config(bg="green")
-                    self.teachers[self.combo.get()].append(day * 8 + hour)
+                    if [shift[0] == day * 8 + hour for shift in tmp_teacher].count(True) == 0:
+                        self.get_shift_name_from_user(day, hour)
+                    else:
+                        shift_name = self.check_btns[day][hour].cget("text")
+                        self.teachers[self.combo.get()].append((day * 8 + hour, shift_name))
                 else:
-                    self.check_btns[day][hour].config(bg="red")
+                    self.check_btns[day][hour].config(text="")
+
         
     def update_schedule(self, event=None):
         for day in range(5):
             for hour in range(8):
-                if self.combo.get() !="" and day * 8 + hour in self.teachers[self.combo.get()]:
+                if self.combo.get() !="" and day * 8 + hour in [shift[0] for shift in self.teachers[self.combo.get()]]:
                     self.check_btns_state[day][hour].set(1)
-                    self.check_btns[day][hour].config(bg="green")
+                    self.check_btns[day][hour].config(text=[shift[1] for shift in self.teachers[self.combo.get()] if shift[0] == day*8 + hour ][0])
                 else:
                     self.check_btns_state[day][hour].set(0)
-                    self.check_btns[day][hour].config(bg="red")
+                    self.check_btns[day][hour].config(text="")
+
 
 
     def create_schedule(self):
@@ -294,10 +335,11 @@ class HomePage(tk.Frame):
         for day in range(5):
             for hour in range(8):
                 self.frm_check_btns[day][hour] = tk.Frame(master=self.frm_schedule, highlightbackground="black", highlightthickness=1)
-                self.check_btns[day][hour] = tk.Checkbutton(master=self.frm_check_btns[day][hour], variable=self.check_btns_state[day][hour], onvalue=1, offvalue=0, bg="red", command=self.handle_checkbox_change)
-
+                self.check_btns[day][hour] = tk.Checkbutton(master=self.frm_check_btns[day][hour], variable=self.check_btns_state[day][hour], onvalue=1, offvalue=0, bg="red", selectcolor="green", fg="white", command=self.handle_checkbox_change, borderwidth=0 ,indicatoron=False)
+               
                 self.check_btns[day][hour].pack(fill=tk.BOTH, expand=True)
                 self.frm_check_btns[day][hour].grid(row=day+1, column=hour+1, sticky=tk.NSEW)
+
     
     def convert_teachers_to_teacher_data(self):
         return [TeacherData(teacher,self.teachers[teacher]) for teacher in self.teachers]
