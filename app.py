@@ -44,6 +44,7 @@ class SolutionWindow(tk.Toplevel):
         for teacher_id, shifts in solution.items():
             self.solution[teacher_id] = []
             for shift in shifts:
+
                 index_of_shift = NAMES_OF_SHIFTS.index(shift[1])
                 for i in range(NUM_OF_SHIFTS):
                     if index_of_shift - i >= 0 and is_shift_free[shift[0]][index_of_shift - i]:
@@ -52,7 +53,7 @@ class SolutionWindow(tk.Toplevel):
                         break
 
                     if index_of_shift + i < NUM_OF_SHIFTS and is_shift_free[shift[0]][index_of_shift + i]:
-                        is_shift_free[shift[0]][index_of_shift - i] = False
+                        is_shift_free[shift[0]][index_of_shift + i] = False
                         index_of_shift = index_of_shift + i
                         break
 
